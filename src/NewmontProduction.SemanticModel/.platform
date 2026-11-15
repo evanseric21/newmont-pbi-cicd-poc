@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "NewmontProduction"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "6d1f3c2a-4b8e-4f5a-9c7d-2e1a0b3c4d5e"
+  }
+}

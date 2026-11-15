@@ -1,0 +1,62 @@
+[
+  {
+    "ID": "NEWMONT_MEASURE_FORMAT_STRING",
+    "Name": "[Formatting] Measures must have a format string",
+    "Category": "Formatting",
+    "Description": "Every measure needs an explicit format string so consumers see consistent numbers.",
+    "Severity": 3,
+    "Scope": "Measure",
+    "Expression": "string.IsNullOrWhitespace(FormatString)",
+    "CompatibilityLevel": 1200
+  },
+  {
+    "ID": "NEWMONT_HIDE_FOREIGN_KEYS",
+    "Name": "[Model] Hide foreign key columns",
+    "Category": "Model Layout",
+    "Description": "Columns on the many side of a relationship should be hidden.",
+    "Severity": 3,
+    "Scope": "DataColumn",
+    "Expression": "UsedInRelationships.Any(FromColumn.Name == current.Name and FromColumn.Table.Name == current.Table.Name) and IsHidden == false",
+    "CompatibilityLevel": 1200
+  },
+  {
+    "ID": "NEWMONT_NO_FLOATING_POINT",
+    "Name": "[Performance] Avoid floating point (Double) columns",
+    "Category": "Performance",
+    "Description": "Use Decimal (fixed) or Int64 to avoid rounding errors in key totals.",
+    "Severity": 3,
+    "Scope": "DataColumn",
+    "Expression": "DataType == \"Double\"",
+    "CompatibilityLevel": 1200
+  },
+  {
+    "ID": "NEWMONT_PARAMETERIZED_SOURCE",
+    "Name": "[Deployment] Partitions must use the environment parameters",
+    "Category": "Deployment",
+    "Description": "M partitions must reference the CatalogName/SchemaName parameters (no hard-coded catalog or schema), so the pipeline can retarget Dev/QA/Prod.",
+    "Severity": 3,
+    "Scope": "Partition",
+    "Expression": "SourceType == \"M\" and not (Expression.Contains(\"CatalogName\") and Expression.Contains(\"SchemaName\"))",
+    "CompatibilityLevel": 1200
+  },
+  {
+    "ID": "NEWMONT_RELATIONSHIP_INT_KEYS",
+    "Name": "[Performance] Relationship columns should be Int64",
+    "Category": "Performance",
+    "Description": "Integer surrogate keys compress and join better than text keys.",
+    "Severity": 2,
+    "Scope": "Relationship",
+    "Expression": "FromColumn.DataType != \"Int64\" or ToColumn.DataType != \"Int64\"",
+    "CompatibilityLevel": 1200
+  },
+  {
+    "ID": "NEWMONT_MODEL_HAS_ROLES",
+    "Name": "[Security] Model should define at least one security role",
+    "Category": "Security",
+    "Description": "Production models are expected to define RLS/OLS roles.",
+    "Severity": 2,
+    "Scope": "Model",
+    "Expression": "Roles.Count() == 0",
+    "CompatibilityLevel": 1200
+  }
+]

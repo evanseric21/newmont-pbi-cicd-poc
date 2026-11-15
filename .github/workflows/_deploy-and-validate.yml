@@ -1,0 +1,83 @@
+# Reusable: deploy PBIP items to one environment and run all promotion checks.
+#   1. Publish (fabric-cicd, environment-specific parameters from src/parameter.yml)
+#   2. Bind to the shared gateway connection + full refresh in the target workspace
+#   3. Model quality  - Tabular Editor 2 Best Practice Analyzer over XMLA
+#   4. Data validation (row counts / key totals vs source) + RLS/OLS verification over XMLA
+name: _deploy-and-validate
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment (dev | qa | production | production-rollback)
+        type: string
+        required: true
+      ref:
+        description: Git ref/sha/tag to deploy
+        type: string
+        required: false
+        default: ''
+    outputs:
+      published:
+        description: "'true' once items were published to the workspace"
+        value: ${{ jobs.deploy.outputs.published }}
+
+jobs:
+  deploy:
+    name: Deploy & Validate
+    runs-on: [self-hosted, windows, pbi]
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 120
+    outputs:
+      published: ${{ steps.deploy.outputs.published }}
+    defaults:
+      run:
+        shell: powershell
+    env:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      SQL_READER_USER: ${{ secrets.SQL_READER_USER }}
+      SQL_READER_PASSWORD: ${{ secrets.SQL_READER_PASSWORD }}
+      FABRIC_ENV: ${{ vars.FABRIC_ENV }}
+      WORKSPACE_ID: ${{ vars.WORKSPACE_ID }}
+      WORKSPACE_NAME: ${{ vars.WORKSPACE_NAME }}
+      SEMANTIC_MODEL_NAME: ${{ vars.SEMANTIC_MODEL_NAME || 'NewmontProduction' }}
+      GATEWAY_ID: ${{ vars.GATEWAY_ID }}
+      CONNECTION_ID: ${{ vars.CONNECTION_ID }}
+      SQL_SERVER: ${{ vars.SQL_SERVER }}
+      SQL_DATABASE: ${{ vars.SQL_DATABASE }}
+      SQL_SCHEMA: ${{ vars.SQL_SCHEMA }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Summary header
+        run: |
+          Add-Content $env:GITHUB_STEP_SUMMARY "## $env:FABRIC_ENV - ${{ inputs.environment }} ($env:WORKSPACE_NAME)`n- Ref: ``${{ inputs.ref || github.sha }}```n"
+
+      - name: Install Python dependencies
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --quiet --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install --quiet -r scripts/requirements.txt
+
+      - name: Publish semantic model & report (fabric-cicd)
+        id: deploy
+        run: .\.venv\Scripts\python.exe scripts/deploy.py
+
+      - name: Bind gateway connection & refresh
+        run: .\.venv\Scripts\python.exe scripts/bind_and_refresh.py --timeout-minutes 60
+
+      - name: Model quality (Best Practice Analyzer)
+        run: .\scripts\Invoke-BestPracticeAnalyzer.ps1 -WorkspaceName "$env:WORKSPACE_NAME" -SemanticModelName "$env:SEMANTIC_MODEL_NAME"
+
+      - name: Data validation & RLS/OLS verification
+        run: >
+          .\scripts\Invoke-ModelTests.ps1
+          -WorkspaceName "$env:WORKSPACE_NAME"
+          -SemanticModelName "$env:SEMANTIC_MODEL_NAME"
+          -SqlServer "$env:SQL_SERVER"
+          -SqlDatabase "$env:SQL_DATABASE"
+          -SqlSchema "$env:SQL_SCHEMA"

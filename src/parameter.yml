@@ -1,0 +1,23 @@
+# fabric-cicd parameterization: swaps environment-specific values in the item
+# definitions at deploy time. Environment keys must match the FABRIC_ENV
+# variable on each GitHub environment (DEV / QA / PROD).
+#
+# Mirrors Newmont's pattern: Dev/QA -> Databricks test catalog, Prod -> production catalog.
+# In this POC the "catalog" is simulated as an Azure SQL schema prefix ("test_gold" / "prod_gold").
+
+find_replace:
+  - find_value: 'expression CatalogName = "test"'
+    replace_value:
+      DEV: 'expression CatalogName = "test"'
+      QA: 'expression CatalogName = "test"'
+      PROD: 'expression CatalogName = "prod"'
+    item_type: "SemanticModel"
+    item_name: "NewmontProduction"
+
+  - find_value: 'expression SchemaName = "gold"'
+    replace_value:
+      DEV: 'expression SchemaName = "gold"'
+      QA: 'expression SchemaName = "gold"'
+      PROD: 'expression SchemaName = "gold"'
+    item_type: "SemanticModel"
+    item_name: "NewmontProduction"

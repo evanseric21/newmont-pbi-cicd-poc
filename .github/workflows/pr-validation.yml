@@ -1,0 +1,40 @@
+# Developer flow: every PR to main deploys the branch to the Dev workspace and runs all promotion checks.
+# Fork PRs never reach the self-hosted runner (public-repo safety); the "Dev gate" check fails for them.
+name: PR validation (Dev)
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  dev:
+    name: Dev
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    concurrency:
+      group: dev-workspace
+      cancel-in-progress: false
+    uses: ./.github/workflows/_deploy-and-validate.yml
+    with:
+      environment: dev
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
+
+  gate:
+    name: Dev gate
+    needs: dev
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a successful Dev deployment
+        env:
+          RESULT: ${{ needs.dev.result }}
+        run: |
+          echo "Dev deploy & validate result: $RESULT"
+          if [ "$RESULT" != "success" ]; then
+            echo "::error::Dev deployment/validation must succeed (fork PRs and draft PRs are not deployed)."
+            exit 1
+          fi

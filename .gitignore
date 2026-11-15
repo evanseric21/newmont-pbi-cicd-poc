@@ -1,0 +1,13 @@
+# Power BI Desktop local files
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+*.pbix
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local secrets
+*.local.json
+.env

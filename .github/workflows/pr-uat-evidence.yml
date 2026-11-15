@@ -1,0 +1,38 @@
+# Enforces "developer testing with UAT evidence attached" on every PR.
+# Runs on GitHub-hosted runners only and never checks out PR code.
+name: UAT evidence
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  uat-evidence:
+    name: UAT evidence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR description for UAT evidence
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        shell: python
+        run: |
+          import os, re, sys
+          body = os.environ.get("BODY") or ""
+          m = re.search(r"^##\s*UAT evidence\s*$(.*?)(?=^##\s|\Z)", body, re.S | re.M | re.I)
+          section = m.group(1) if m else ""
+          problems = []
+          if not m:
+              problems.append("Missing '## UAT evidence' section (use the PR template).")
+          if not re.search(r"https?://\S+", section):
+              problems.append("Attach at least one screenshot/file or link (e.g. drag an image into the PR) under '## UAT evidence'.")
+          if not re.search(r"^\s*[-*]\s*\[[xX]\]\s*I tested these changes in the Dev workspace", body, re.M):
+              problems.append("Tick '[x] I tested these changes in the Dev workspace'.")
+          if problems:
+              for p in problems:
+                  print(f"::error::{p}")
+              sys.exit(1)
+          print("UAT evidence present.")

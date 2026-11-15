@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "NewmontProduction"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9a2b7c4d-3e1f-4a6b-8c5d-7e0f1a2b3c4d"
+  }
+}

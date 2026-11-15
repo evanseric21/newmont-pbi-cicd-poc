@@ -1,0 +1,8 @@
+relationship 3b9a6c1e-7d2f-4e8a-a1b5-0c9d8e7f6a51
+	fromColumn: FactProduction.SiteKey
+	toColumn: DimSite.SiteKey
+
+relationship 8e4d2a7b-1c6f-4b3e-9a2d-5f7e1c3b9d62
+	fromColumn: FactProduction.DateKey
+	toColumn: DimDate.DateKey
+

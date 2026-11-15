@@ -1,0 +1,16 @@
+/// Azure SQL logical server. Stands in for the Databricks host/HTTP path in Newmont's environment.
+expression SqlServer = "newmont-poc-sql.database.windows.net" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	annotation PBI_ResultType = Text
+
+/// Azure SQL database. One database = one shared gateway connection for every environment.
+expression SqlDatabase = "newmont_poc" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	annotation PBI_ResultType = Text
+
+/// Simulates the Databricks Unity Catalog catalog. "test" for Dev/QA, "prod" for Prod (swapped by parameter.yml at deploy time).
+expression CatalogName = "test" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	annotation PBI_ResultType = Text
+
+/// Simulates the Databricks schema within the catalog.
+expression SchemaName = "gold" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	annotation PBI_ResultType = Text
+

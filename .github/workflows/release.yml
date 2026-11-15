@@ -1,0 +1,91 @@
+# Release flow after a peer-reviewed PR merges to main:
+#   QA  -> automatic deploy + promotion checks (Databricks *test* equivalent)
+#   Prod -> waits for Product Owner approval (GitHub environment "production"), deploy + promotion checks
+#   On success the commit is tagged release-* (the "last approved version").
+#   If Prod checks fail after publishing, the previous release-* tag is redeployed automatically.
+name: Release (QA -> Prod)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'bpa/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: QA
+    uses: ./.github/workflows/_deploy-and-validate.yml
+    with:
+      environment: qa
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  prod:
+    name: Prod
+    needs: qa
+    uses: ./.github/workflows/_deploy-and-validate.yml
+    with:
+      environment: production
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  tag:
+    name: Tag approved release
+    needs: prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Create release tag
+        run: |
+          TAG="release-$(date -u +%Y%m%d-%H%M%S)-run${{ github.run_number }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Approved and deployed to Prod by workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git push origin "$TAG"
+          echo "### Tagged \`$TAG\` as the last approved Prod version" >> "$GITHUB_STEP_SUMMARY"
+
+  find-rollback-target:
+    name: Find last approved version
+    needs: prod
+    if: failure() && needs.prod.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.find.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: find
+        run: |
+          TAG=$(git tag --list 'release-*' --sort=-creatordate | head -n 1)
+          if [ -z "$TAG" ]; then
+            echo "::error::No release-* tag exists yet - nothing to roll back to."
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "### Prod failed after publish - rolling back to \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+
+  rollback:
+    name: Auto-rollback Prod
+    needs: find-rollback-target
+    uses: ./.github/workflows/_deploy-and-validate.yml
+    with:
+      environment: production-rollback
+      ref: ${{ needs.find-rollback-target.outputs.tag }}
+    secrets: inherit

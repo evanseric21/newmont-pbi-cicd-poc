@@ -1,0 +1,53 @@
+# Manual rollback: redeploy a previously approved release-* tag to Prod.
+# Uses the "production" environment, so the Product Owner must approve the rollback too.
+name: Rollback Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "release-* tag to redeploy (leave empty for the version before the latest release)"
+        required: false
+        default: ''
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: resolve
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG=$(git tag --list 'release-*' --sort=-creatordate | sed -n '2p')
+          fi
+          if [[ ! "$TAG" =~ ^release- ]] || ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::'$TAG' is not an existing release-* tag."
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "### Rolling Prod back to \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+
+  rollback:
+    name: Prod rollback
+    needs: resolve
+    uses: ./.github/workflows/_deploy-and-validate.yml
+    with:
+      environment: production
+      ref: ${{ needs.resolve.outputs.tag }}
+    secrets: inherit

@@ -1,0 +1,56 @@
+table FactProduction
+
+	measure 'Total Gold Ounces' = SUM(FactProduction[GoldOunces])
+		formatString: #,0.00
+
+	measure 'Total Ore Tonnes' = SUM(FactProduction[OreTonnes])
+		formatString: #,0.00
+
+	measure 'Total Cost USD' = SUM(FactProduction[CostUSD])
+		formatString: \$#,0.00
+
+	measure 'Cost per Ounce' = DIVIDE([Total Cost USD], [Total Gold Ounces])
+		formatString: \$#,0.00
+
+	column DateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	column SiteKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SiteKey
+
+	column GoldOunces
+		dataType: decimal
+		formatString: #,0.00
+		summarizeBy: sum
+		sourceColumn: GoldOunces
+
+	column OreTonnes
+		dataType: decimal
+		formatString: #,0.00
+		summarizeBy: sum
+		sourceColumn: OreTonnes
+
+	/// Secured by object-level security in the 'Restricted Cost' role.
+	column CostUSD
+		dataType: decimal
+		formatString: \$#,0.00
+		summarizeBy: sum
+		sourceColumn: CostUSD
+
+	partition FactProduction = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = CatalogName & "_" & SchemaName, Item = "FactProduction"]}[Data]
+				in
+				    Data
+

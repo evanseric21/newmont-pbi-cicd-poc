@@ -1,0 +1,7 @@
+/// Object-level security: members cannot see FactProduction[CostUSD] (or measures that depend on it).
+role 'Restricted Cost'
+	modelPermission: read
+
+	tablePermission FactProduction
+		columnPermission CostUSD = none
+

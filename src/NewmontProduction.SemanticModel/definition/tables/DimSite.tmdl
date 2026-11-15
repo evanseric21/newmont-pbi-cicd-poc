@@ -1,0 +1,33 @@
+table DimSite
+
+	column SiteKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SiteKey
+
+	column SiteName
+		dataType: string
+		summarizeBy: none
+		sourceColumn: SiteName
+
+	column Region
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Region
+
+	column Country
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Country
+
+	partition DimSite = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = CatalogName & "_" & SchemaName, Item = "DimSite"]}[Data]
+				in
+				    Data
+

@@ -1,0 +1,12 @@
+{
+  "$comment": "Copy to poc-config.local.json (git-ignored) and fill in. No secrets here.",
+  "sqlServer": "newmont-poc-sql-xxxxxx.database.windows.net",
+  "sqlDatabase": "newmont_poc",
+  "gatewayId": "00000000-0000-0000-0000-000000000000",
+  "connectionId": "00000000-0000-0000-0000-000000000000",
+  "workspaces": {
+    "dev":  { "id": "00000000-0000-0000-0000-000000000000", "name": "Newmont POC - Dev" },
+    "qa":   { "id": "00000000-0000-0000-0000-000000000000", "name": "Newmont POC - QA" },
+    "prod": { "id": "00000000-0000-0000-0000-000000000000", "name": "Newmont POC - Prod" }
+  }
+}
