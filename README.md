@@ -7,6 +7,7 @@ End-to-end CI/CD for Power BI (PBIP/TMDL), using GitHub Actions, `fabric-cicd`, 
 | Doc | |
 |---|---|
 | [docs/POC-Plan.md](docs/POC-Plan.md) | Scope, architecture, workstreams, demo script |
+| [docs/Walkthrough.md](docs/Walkthrough.md) | **Start here:** phased setup with a checkpoint after each phase |
 | [docs/Setup-Guide.md](docs/Setup-Guide.md) | Step-by-step build of the test environment |
 | [docs/Newmont-QA.md](docs/Newmont-QA.md) | Customer-facing answers, feasibility caveats, open questions |
 
