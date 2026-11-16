@@ -26,8 +26,8 @@ table DimSite
 		mode: import
 		source =
 				let
-				    Source = Sql.Database(SqlServer, SqlDatabase),
-				    Data = Source{[Schema = CatalogName & "_" & SchemaName, Item = "DimSite"]}[Data]
+				    Source = Sql.Database(SqlServer, CatalogName),
+				    Data = Source{[Schema = SchemaName, Item = "DimSite"]}[Data]
 				in
 				    Data
 

@@ -3,14 +3,15 @@
 # variable on each GitHub environment (DEV / QA / PROD).
 #
 # Mirrors Newmont's pattern: Dev/QA -> Databricks test catalog, Prod -> production catalog.
-# In this POC the "catalog" is simulated as an Azure SQL schema prefix ("test_gold" / "prod_gold").
+# In this POC each "catalog" is a separate Azure SQL database (newmont_test / newmont_prod)
+# and the schema is "gold" in both.
 
 find_replace:
-  - find_value: 'expression CatalogName = "test"'
+  - find_value: 'expression CatalogName = "newmont_test"'
     replace_value:
-      DEV: 'expression CatalogName = "test"'
-      QA: 'expression CatalogName = "test"'
-      PROD: 'expression CatalogName = "prod"'
+      DEV: 'expression CatalogName = "newmont_test"'
+      QA: 'expression CatalogName = "newmont_test"'
+      PROD: 'expression CatalogName = "newmont_prod"'
     item_type: "SemanticModel"
     item_name: "NewmontProduction"
 

@@ -1,4 +1,4 @@
-"""Bind the semantic model to the shared gateway connection, run a full refresh and wait for it.
+"""Bind the semantic model to its connection on the shared gateway, run a full refresh and wait for it.
 
 A successful refresh in the target environment is one of the promotion checks.
 
@@ -6,7 +6,9 @@ Environment variables:
   AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET  service principal
   WORKSPACE_ID, SEMANTIC_MODEL_NAME
   GATEWAY_ID      on-premises data gateway (cluster) id
-  CONNECTION_ID   shared gateway connection id (Azure SQL in the POC, Databricks at Newmont)
+  CONNECTION_ID   gateway connection id for this environment's source. In the POC: test-database
+                  connection for Dev/QA, prod-database connection for Prod. At Newmont, with one
+                  Databricks host + HTTP path, every environment can use the same connection id.
 """
 import argparse
 import sys

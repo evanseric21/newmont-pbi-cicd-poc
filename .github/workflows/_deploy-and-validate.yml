@@ -1,6 +1,6 @@
 # Reusable: deploy PBIP items to one environment and run all promotion checks.
 #   1. Publish (fabric-cicd, environment-specific parameters from src/parameter.yml)
-#   2. Bind to the shared gateway connection + full refresh in the target workspace
+#   2. Bind to this environment's connection on the shared gateway + full refresh in the target workspace
 #   3. Model quality  - Tabular Editor 2 Best Practice Analyzer over XMLA
 #   4. Data validation (row counts / key totals vs source) + RLS/OLS verification over XMLA
 name: _deploy-and-validate

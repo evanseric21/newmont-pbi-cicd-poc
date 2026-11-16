@@ -1,5 +1,6 @@
 // Newmont CI/CD POC - Azure infrastructure
-//   * Azure SQL logical server + database "newmont_poc" (simulates Databricks test/prod catalogs)
+//   * Azure SQL logical server + two databases that simulate the Databricks catalogs:
+//       newmont_test -> Dev / QA (Databricks test)    newmont_prod -> Prod (Databricks production)
 //   * Windows Server VM hosting the GitHub self-hosted runner AND the on-premises data gateway
 //
 // Deploy:
@@ -52,9 +53,25 @@ resource sql 'Microsoft.Sql/servers@2023-08-01-preview' = {
   }
 }
 
-resource db 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
+@description('Dev/QA database (Databricks test catalog) and Prod database (Databricks production catalog).')
+param sqlDatabaseNames object = {
+  test: 'newmont_test'
+  prod: 'newmont_prod'
+}
+
+resource dbTest 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
   parent: sql
-  name: 'newmont_poc'
+  name: sqlDatabaseNames.test
+  location: location
+  sku: {
+    name: 'Basic'
+    tier: 'Basic'
+  }
+}
+
+resource dbProd 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
+  parent: sql
+  name: sqlDatabaseNames.prod
   location: location
   sku: {
     name: 'Basic'
@@ -198,6 +215,7 @@ resource shutdown 'Microsoft.DevTestLab/schedules@2018-09-15' = if (!empty(autoS
 }
 
 output sqlServerFqdn string = sql.properties.fullyQualifiedDomainName
-output sqlDatabase string = db.name
+output sqlTestDatabase string = dbTest.name
+output sqlProdDatabase string = dbProd.name
 output vmName string = vm.name
 output vmPublicIp string = pip.properties.ipAddress

@@ -104,7 +104,7 @@ $results += $tests.security       | ForEach-Object { Test-Case $_ 'RLS/OLS' }
 $results | Format-Table -AutoSize | Out-String -Width 250 | Write-Host
 
 if ($env:GITHUB_STEP_SUMMARY) {
-    $md = @("### Model tests ($SemanticModelName @ $WorkspaceName, source schema ``$SqlSchema``)", '',
+    $md = @("### Model tests ($SemanticModelName @ $WorkspaceName, source ``$SqlDatabase.$SqlSchema``)", '',
             '| Result | Category | Check | Role | Expected | Actual |', '|---|---|---|---|---|---|')
     foreach ($r in $results) {
         $icon = if ($r.Passed) { 'PASS' } else { 'FAIL' }

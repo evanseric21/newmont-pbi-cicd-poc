@@ -27,7 +27,7 @@ Legend: ✅ Supported as described · ⚠️ Supported with caveats or a configu
 - ⚠️ The credential on the shared connection applies to every environment. If Prod must use a different Databricks identity than Test (common for segregation of duties), use separate connections.
 - ⚠️ A gateway is only needed if Databricks is not publicly reachable (Private Link or no public access). Otherwise a cloud connection without a gateway is simpler. Please confirm which applies.
 - **Service principal needs:** the deployment SP must be added as a **User** on the gateway connection, or it can't bind models to it.
-- POC note: we simulate Databricks with an Azure SQL database containing `test_gold` and `prod_gold` schemas behind one gateway connection. The parameter-swap mechanism is identical.
+- POC note: we simulate Databricks with two Azure SQL databases, `newmont_test` (Dev/QA) and `newmont_prod` (Prod), on one gateway. Because an Azure SQL connection includes the database name, the POC uses **two connections on the same gateway** and the pipeline binds each environment to its own connection ID. That is exactly the separate-endpoints case above. The parameter swap is identical; with a single Databricks connection, both environments simply use the same connection ID.
 
 ### 1.4 Roles and approvals ✅
 | Control | Implementation | Enforced by |

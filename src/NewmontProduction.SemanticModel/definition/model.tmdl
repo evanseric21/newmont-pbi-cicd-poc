@@ -6,7 +6,7 @@ model Model
 		legacyRedirects
 		returnErrorValuesAsNull
 
-annotation PBI_QueryOrder = ["SqlServer","SqlDatabase","CatalogName","SchemaName","DimSite","DimDate","FactProduction"]
+annotation PBI_QueryOrder = ["SqlServer","CatalogName","SchemaName","DimSite","DimDate","FactProduction"]
 
 ref table DimSite
 ref table DimDate

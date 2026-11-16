@@ -5,7 +5,8 @@
 
   * Environments  dev (any branch), qa (main only), production (main + release tags, Product Owner approval,
                   no self-approval), production-rollback (main only, used by automatic rollback)
-  * Variables     per-environment FABRIC_ENV / WORKSPACE_* / SQL_SCHEMA, repo-level gateway/SQL settings
+  * Variables     per-environment FABRIC_ENV / WORKSPACE_* / SQL_DATABASE / CONNECTION_ID,
+                  repo-level gateway, SQL server and schema
   * Secrets       service principal + SQL reader (prompted, never written to disk)
   * Branch rules  main: PR required, 1 approval, code-owner review, stale approvals dismissed,
                   required checks "UAT evidence" and "Dev gate"
@@ -56,17 +57,20 @@ foreach ($envName in 'qa','production','production-rollback') {
 $repoVars = @{
     SEMANTIC_MODEL_NAME = 'NewmontProduction'
     GATEWAY_ID          = $cfg.gatewayId
-    CONNECTION_ID       = $cfg.connectionId
     SQL_SERVER          = $cfg.sqlServer
-    SQL_DATABASE        = $cfg.sqlDatabase
+    SQL_SCHEMA          = 'gold'
 }
 foreach ($k in $repoVars.Keys) { gh variable set $k --repo $Repo --body "$($repoVars[$k])" }
 
+# Dev/QA -> test database (Databricks test catalog); Prod -> prod database (Databricks production catalog).
+# Each database has its own connection on the shared gateway, so CONNECTION_ID is per environment.
+$test = @{ SQL_DATABASE = $cfg.sources.test.database; CONNECTION_ID = $cfg.sources.test.connectionId }
+$prod = @{ SQL_DATABASE = $cfg.sources.prod.database; CONNECTION_ID = $cfg.sources.prod.connectionId }
 $envVars = @{
-    'dev'                 = @{ FABRIC_ENV = 'DEV';  WORKSPACE_ID = $cfg.workspaces.dev.id;  WORKSPACE_NAME = $cfg.workspaces.dev.name;  SQL_SCHEMA = 'test_gold' }
-    'qa'                  = @{ FABRIC_ENV = 'QA';   WORKSPACE_ID = $cfg.workspaces.qa.id;   WORKSPACE_NAME = $cfg.workspaces.qa.name;   SQL_SCHEMA = 'test_gold' }
-    'production'          = @{ FABRIC_ENV = 'PROD'; WORKSPACE_ID = $cfg.workspaces.prod.id; WORKSPACE_NAME = $cfg.workspaces.prod.name; SQL_SCHEMA = 'prod_gold' }
-    'production-rollback' = @{ FABRIC_ENV = 'PROD'; WORKSPACE_ID = $cfg.workspaces.prod.id; WORKSPACE_NAME = $cfg.workspaces.prod.name; SQL_SCHEMA = 'prod_gold' }
+    'dev'                 = @{ FABRIC_ENV = 'DEV';  WORKSPACE_ID = $cfg.workspaces.dev.id;  WORKSPACE_NAME = $cfg.workspaces.dev.name } + $test
+    'qa'                  = @{ FABRIC_ENV = 'QA';   WORKSPACE_ID = $cfg.workspaces.qa.id;   WORKSPACE_NAME = $cfg.workspaces.qa.name } + $test
+    'production'          = @{ FABRIC_ENV = 'PROD'; WORKSPACE_ID = $cfg.workspaces.prod.id; WORKSPACE_NAME = $cfg.workspaces.prod.name } + $prod
+    'production-rollback' = @{ FABRIC_ENV = 'PROD'; WORKSPACE_ID = $cfg.workspaces.prod.id; WORKSPACE_NAME = $cfg.workspaces.prod.name } + $prod
 }
 foreach ($e in $envVars.Keys) {
     foreach ($k in $envVars[$e].Keys) { gh variable set $k --repo $Repo --env $e --body "$($envVars[$e][$k])" }

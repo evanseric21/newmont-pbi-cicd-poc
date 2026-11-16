@@ -2,12 +2,8 @@
 expression SqlServer = "newmont-poc-sql.database.windows.net" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	annotation PBI_ResultType = Text
 
-/// Azure SQL database. One database = one shared gateway connection for every environment.
-expression SqlDatabase = "newmont_poc" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	annotation PBI_ResultType = Text
-
-/// Simulates the Databricks Unity Catalog catalog. "test" for Dev/QA, "prod" for Prod (swapped by parameter.yml at deploy time).
-expression CatalogName = "test" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+/// Simulates the Databricks Unity Catalog catalog as an Azure SQL database: "newmont_test" for Dev/QA, "newmont_prod" for Prod (swapped by parameter.yml at deploy time).
+expression CatalogName = "newmont_test" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	annotation PBI_ResultType = Text
 
 /// Simulates the Databricks schema within the catalog.

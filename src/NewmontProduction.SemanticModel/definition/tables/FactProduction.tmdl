@@ -49,8 +49,8 @@ table FactProduction
 		mode: import
 		source =
 				let
-				    Source = Sql.Database(SqlServer, SqlDatabase),
-				    Data = Source{[Schema = CatalogName & "_" & SchemaName, Item = "FactProduction"]}[Data]
+				    Source = Sql.Database(SqlServer, CatalogName),
+				    Data = Source{[Schema = SchemaName, Item = "FactProduction"]}[Data]
 				in
 				    Data
 

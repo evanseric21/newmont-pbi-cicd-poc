@@ -1,5 +1,5 @@
 {
-  "$comment": "Promotion checks run against the deployed semantic model over XMLA. {schema} is replaced with the environment's SQL schema (catalog_schema). Each 'sql' check compares the DAX result to the source; 'expected' compares to a literal; 'expectError' asserts the query is blocked (OLS).",
+  "$comment": "Promotion checks run against the deployed semantic model over XMLA. Source SQL runs against the environment's database (SQL_DATABASE: newmont_test for Dev/QA, newmont_prod for Prod); {schema} is replaced with SQL_SCHEMA (gold). Each 'sql' check compares the DAX result to the source; 'expected' compares to a literal; 'expectError' asserts the query is blocked (OLS).",
   "dataValidation": [
     {
       "name": "FactProduction row count matches source",

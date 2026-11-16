@@ -1,6 +1,6 @@
 # Newmont Power BI CI/CD POC
 
-End-to-end CI/CD for Power BI (PBIP/TMDL), using GitHub Actions, `fabric-cicd`, a self-hosted Windows runner, and one shared gateway connection with per-environment catalog/schema parameters.
+End-to-end CI/CD for Power BI (PBIP/TMDL), using GitHub Actions, `fabric-cicd`, a self-hosted Windows runner, and one shared gateway with per-environment catalog/schema parameters (Dev/QA → `newmont_test`, Prod → `newmont_prod`).
 
 **Flow:** feature branch → PR (Dev deploy, refresh, BPA, data and RLS/OLS tests, UAT evidence, peer review) → merge → QA (same checks) → **Product Owner approval** → Prod (same checks) → `release-*` tag, with auto-rollback to the previous tag on failure.
 
@@ -26,8 +26,8 @@ src/
 scripts/                                 deploy.py, bind_and_refresh.py, Invoke-*.ps1, setup scripts
 tests/model-tests.json                   data validation + RLS/OLS assertions
 bpa/BPARules.json                        model-quality rules
-infra/main.bicep                         Azure SQL + runner/gateway VM
-sql/seed.sql                             sample data (test_gold / prod_gold)
+infra/main.bicep                         Azure SQL (newmont_test + newmont_prod) + runner/gateway VM
+sql/seed.sql                             sample data (run once per database)
 ```
 
 > ⚠️ This repo is public only because GitHub Free needs a public repo for environment required reviewers. It contains fictional sample data and no secrets. Fork PRs never run on the self-hosted runner.

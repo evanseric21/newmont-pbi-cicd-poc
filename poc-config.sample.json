@@ -1,9 +1,11 @@
 {
-  "$comment": "Copy to poc-config.local.json (git-ignored) and fill in. No secrets here.",
+  "$comment": "Copy to poc-config.local.json (git-ignored) and fill in. No secrets here. One gateway, one connection per database (Azure SQL connections are keyed on server + database).",
   "sqlServer": "newmont-poc-sql-xxxxxx.database.windows.net",
-  "sqlDatabase": "newmont_poc",
   "gatewayId": "00000000-0000-0000-0000-000000000000",
-  "connectionId": "00000000-0000-0000-0000-000000000000",
+  "sources": {
+    "test": { "database": "newmont_test", "connectionId": "00000000-0000-0000-0000-000000000000" },
+    "prod": { "database": "newmont_prod", "connectionId": "00000000-0000-0000-0000-000000000000" }
+  },
   "workspaces": {
     "dev":  { "id": "00000000-0000-0000-0000-000000000000", "name": "Newmont POC - Dev" },
     "qa":   { "id": "00000000-0000-0000-0000-000000000000", "name": "Newmont POC - QA" },
