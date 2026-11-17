@@ -11,7 +11,7 @@ param(
     [string] $TabularEditorPath = $(if ($env:TABULAR_EDITOR_PATH) { $env:TABULAR_EDITOR_PATH } else { 'C:\tools\TabularEditor\TabularEditor.exe' })
 )
 $ErrorActionPreference = 'Stop'
-if (-not (Test-Path $TabularEditorPath)) { throw "Tabular Editor 2 not found at $TabularEditorPath (see scripts/Setup-RunnerVm.ps1)" }
+if (-not (Test-Path $TabularEditorPath)) { throw "Tabular Editor 2 not found at $TabularEditorPath. Install Tabular Editor 2 on the runner or set TABULAR_EDITOR_PATH to its executable." }
 
 $server = "Provider=MSOLAP;Data Source=powerbi://api.powerbi.com/v1.0/myorg/$WorkspaceName;" +
           "User ID=app:$($env:AZURE_CLIENT_ID)@$($env:AZURE_TENANT_ID);Password=$($env:AZURE_CLIENT_SECRET)"
